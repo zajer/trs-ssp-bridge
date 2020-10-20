@@ -1,7 +1,8 @@
 (
     tests
     (names 
-        example_tests
+        common_tests
+        norm_tests
     ) 
-    (libraries ounit2 )
+    (libraries ounit2 bigraph trs_bridge )
 )

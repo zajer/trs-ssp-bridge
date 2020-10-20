@@ -1,0 +1,6 @@
+
+(executables
+  (names main3 ) 
+  (libraries trs_bridge )
+  (modes native )
+) 
