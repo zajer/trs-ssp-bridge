@@ -1,0 +1,6 @@
+
+(library
+  (name trs_bridge)
+  ( libraries bigraph csv )
+)
+

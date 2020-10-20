@@ -1,0 +1,7 @@
+(
+    tests
+    (names 
+        example_tests
+    ) 
+    (libraries ounit2 )
+)
