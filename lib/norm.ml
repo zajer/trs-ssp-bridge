@@ -21,14 +21,6 @@ let t_normalized_2_sll t_norm =
       [string_of_int init_state_idx;string_of_int res_state_idx;react_label; Bigraph.Iso.to_string iso_init2lhs; Bigraph.Iso.to_string new_iso_res2init; Bigraph.Big.to_string new_res_state ]
   )
   t_norm;;
-let filename_without_extension fn =
-  let regex_str = "[.]csv" in
-  let regex = Str.regexp regex_str in
-  try 
-      let idx_of_extension = Str.search_forward regex fn 0 in
-      Str.string_before fn idx_of_extension
-  with
-  | Not_found -> fn
 let make_map_out_of_s s_parsed =
   List.fold_left (fun map (idx,bigraph) -> IntMap.add idx bigraph map) IntMap.empty s_parsed;;
 let normalize_exported_ss_no_saving s_parsed t_parsed  =
@@ -38,7 +30,7 @@ let normalize_exported_ss_no_saving s_parsed t_parsed  =
 let normalize_exported_ss s_parsed t_parsed orig_trans_file_name =
   let t_normalized = normalize_exported_ss_no_saving s_parsed t_parsed in
   let t_normalized_sll = t_normalized_2_sll t_normalized in
-    Csv.save ((filename_without_extension orig_trans_file_name )^"_normalized.csv") (t_normalized_sll) ;
+    Csv.save ((filename_without_extension "csv" orig_trans_file_name )^"_normalized.csv") (t_normalized_sll) ;
     t_normalized
 let normalize_exported_ss_csv ~states_file:sfn ~trans_file:tfn =
   let s = Csv.load sfn |> Parsing.parse_s

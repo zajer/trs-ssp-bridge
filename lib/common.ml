@@ -53,3 +53,11 @@ let i_tuple ?(mody=[]) number_of_agents =
       "("^ai^","^xi^")"
     ) |> String.concat "," in
     "("^list_of_elem^")"
+let filename_without_extension extension fn =
+  let regex_str = "[.]"^extension in
+  let regex = Str.regexp regex_str in
+  try 
+      let idx_of_extension = Str.search_forward regex fn 0 in
+      Str.string_before fn idx_of_extension
+  with
+  | Not_found -> fn

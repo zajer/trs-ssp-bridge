@@ -15,3 +15,11 @@ let parse_t tll =
   tll;;
 let parse_t_without_header tll =
           parse_t (List.tl tll)
+let parse_patterns sll = 
+  List.map 
+  (
+    fun input -> 
+      let big_as_string = los2_s input in
+      Bigraph.Big.of_string big_as_string
+  )
+  sll
