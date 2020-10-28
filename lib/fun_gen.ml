@@ -19,15 +19,15 @@ let map_states_with_agent_ids_and_ordering_iso s agent_ctrls =
     ) 
     IntMap.empty s
 let get_order_of_agents_after_transition mapped_states init_state_id res_state_id residue =
-  let agents_in_res_state,_ = IntMap.find res_state_id mapped_states
-  and _ ,ordering_iso = IntMap.find init_state_id mapped_states in
+  let agents_in_res_state,_ = try IntMap.find res_state_id mapped_states with Not_found -> raise (Invalid_argument "Not Found in order of agents, fist call")
+  and _ ,ordering_iso = try IntMap.find init_state_id mapped_states with Not_found -> raise (Invalid_argument "Not Found in order of agents, second call") in
   let residue_of_agents = filter_non_agent_ids_from_iso residue agents_in_res_state in
   let residue_of_agents_with_transformed_codom_= Bigraph.Iso.transform ~iso_dom:(make_id_iso (Bigraph.Iso.dom residue_of_agents)) ~iso_codom:ordering_iso residue_of_agents
   in
     let _ ,result = Bigraph.Iso.to_list residue_of_agents_with_transformed_codom_ |> List.split in
     result;;
 let get_ids_of_agents_participating_in_transition mapped_states init_state_id lhs2init =
-  let _ ,ordering_iso = IntMap.find init_state_id mapped_states in
+  let _ ,ordering_iso = try IntMap.find init_state_id mapped_states with Not_found -> raise (Invalid_argument "Not Found in ids of participating agents") in
   let lhs2init_with_transformed_codom = Bigraph.Iso.transform ~iso_dom:(make_id_iso (Bigraph.Iso.dom lhs2init)) ~iso_codom:ordering_iso lhs2init in
     Bigraph.Iso.codom lhs2init_with_transformed_codom ;;
 let construct_trans_function_for_one_agent name label transition_data =
@@ -56,7 +56,7 @@ let construct_null_trans_function () =
   "let f_null _ _ = Unreachable"
 let gen_trans_functions s_parsed t_parsed map_trans2time_shift list_of_agents_ctrls= 
   let mapped_s = map_states_with_agent_ids_and_ordering_iso s_parsed list_of_agents_ctrls in
-  let functions = List.mapi (fun i (from_idx,to_idx,label,lhs2from,residue,_) -> construct_trans_function mapped_s ~from_idx ~to_idx~lhs2from ~residue ~name:("f"^string_of_int i) ~label:(string_of_int i) (StringMap.find label map_trans2time_shift) ) t_parsed
+  let functions = List.mapi (fun i (from_idx,to_idx,label,lhs2from,residue,_) -> construct_trans_function mapped_s ~from_idx ~to_idx~lhs2from ~residue ~name:("f"^string_of_int i) ~label:(string_of_int i) (try StringMap.find label map_trans2time_shift with Not_found -> raise (Invalid_argument "Not Found in get trans function")) ) t_parsed
     in
     (construct_null_trans_function ()) :: functions
 let gen_trans_functions_based_on_csv ~states_file:(sfn) ~norm_trans_file:(tfn) map_trans2time_shift list_of_agents_ctrls= 

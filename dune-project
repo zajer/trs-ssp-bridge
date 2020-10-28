@@ -1,6 +1,6 @@
 (lang dune 2.0)
 (name TRS_bridge)
-(version 0.9)
+(version 1.0)
 (generate_opam_files true)
 
 (source (github zajer/trs-ssp-bridge))

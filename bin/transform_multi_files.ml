@@ -22,6 +22,6 @@ let help () =
   and module_name = Sys.argv.(5)
   and output_file = Sys.argv.(6)
   and num_of_agents = Sys.argv.(7) |> int_of_string in
-    Facade.full_transformation_saving_norm ~states_file ~trans_file ~trans2time_shift_file:trans2timeshift_file ~ctrls_file ~module_name:module_name ~output_filename:output_file ~separate_functions:false num_of_agents
+    Facade.full_transformation_saving_norm ~states_file ~trans_file ~trans2time_shift_file:trans2timeshift_file ~ctrls_file ~module_name:module_name ~output_filename:output_file ~separate_functions:true num_of_agents
   else
     help ()
