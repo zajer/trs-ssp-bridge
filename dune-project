@@ -1,6 +1,6 @@
 (lang dune 2.0)
 (name TRS_bridge)
-(version 1.0)
+(version 0.8.0)
 (generate_opam_files true)
 
 (source (github zajer/trs-ssp-bridge))
@@ -17,5 +17,11 @@
   (tags ("yolo" "swag"))
   (depends
     (dune (and :build (>= 2.0.0)))
-    (odoc :with-doc)))
+    (odoc :with-doc)
+    bigraph
+    tracking_bigraph
+    csv
+    (ounit2 :with-test)
+  )
+)
   
