@@ -1,19 +1,20 @@
-open Common
 module IntMap = Map.Make(Int);;
 module StringMap = Map.Make(String);;
 module OIntSet = Set.Make(Int);;
-(* Each state id is mapped to the list of ints (representing ids of nodes) that correspond to agents in that state *)
+(* Each state id is mapped to the list of ints (representing ids of nodes) that correspond to relative agents order in that state *)
 type state_id_2_agent_node_ids_with_fix_map = (int, (int*int) list) Hashtbl.t
+type mapped_states = state_id_2_agent_node_ids_with_fix_map
 type trans_fun = {permutation_with_time_shift:(int*int) list; react_label:string}
-type react_time = (string,int) Hashtbl.t
+type react_times = (string,int) Hashtbl.t
 (*#################NOWE###################################*)
-let bintset_2_int_list bis =
+let _bintset_2_int_list bis =
   Bigraph.IntSet.fold (fun i res -> i::res) bis []
-let extract_agent_node_ids bigraph list_of_ctrls =
+(* Bigraph.Nodes.find_all considers only the control type. It ommits arity of a control!*)
+let _extract_agent_node_ids bigraph list_of_ctrls =
   List.fold_left 
     (
       fun res ctrl -> 
-        let list_of_nodes_ids_with_specific_ctrl = Bigraph.Nodes.find_all ctrl bigraph.Bigraph.Big.n |> bintset_2_int_list in 
+        let list_of_nodes_ids_with_specific_ctrl = Bigraph.Nodes.find_all ctrl bigraph.Bigraph.Big.n |> _bintset_2_int_list in 
         List.append list_of_nodes_ids_with_specific_ctrl res 
     ) 
     [] 
@@ -87,7 +88,7 @@ let convert_states states_list agent_ctrls_list =
       (
         fun state -> 
           let state_idx = state.Tracking_bigraph.TTS.index
-          and list_of_agent_nodes = extract_agent_node_ids state.bigraph agent_ctrls_list in
+          and list_of_agent_nodes = _extract_agent_node_ids state.bigraph agent_ctrls_list in
           let list_of_agent_nodes_mapped_with_relative_agent_ids = map_agent_node_ids_2_relative_agent_ids list_of_agent_nodes in
           state_idx,list_of_agent_nodes_mapped_with_relative_agent_ids
       ) states_list
