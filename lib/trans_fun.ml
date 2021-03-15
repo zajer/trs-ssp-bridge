@@ -4,7 +4,8 @@ module OIntSet = Set.Make(Int);;
 (* Each state id is mapped to the list of ints (representing ids of nodes) that correspond to relative agents order in that state *)
 type state_id_2_agent_node_ids_with_fix_map = (int, (int*int) list) Hashtbl.t
 type mapped_states = state_id_2_agent_node_ids_with_fix_map
-type trans_fun = {permutation_with_time_shift:(int*int) list; react_label:string}
+type t = {permutation_with_time_shift:(int*int) list; react_label:string}
+type paired_trans_fun = t*int
 type react_times = (string,int) Hashtbl.t
 (*#################NOWE###################################*)
 let _bintset_2_int_list bis =
@@ -100,8 +101,8 @@ let convert_states states_list agent_ctrls_list =
 let convert_transitions imported_states imported_trans time_shifts agent_ctrls =
   let mapped_states = convert_states imported_states agent_ctrls in
   let converted_trans = 
-    List.map 
-      (fun t -> convert_trans_2_trans_fun t mapped_states time_shifts )
+    List.mapi 
+      (fun i t -> convert_trans_2_trans_fun t mapped_states time_shifts,i )
       imported_trans 
   in
   converted_trans
