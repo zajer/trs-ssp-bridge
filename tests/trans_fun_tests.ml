@@ -1,6 +1,7 @@
 open OUnit2
 module OIntSet = Set.Make(Int)
 open Trs_bridge
+open Bigraph
 let _compare_trans_fun_data l1 l2 = 
   List.for_all2 (fun el1 el2 -> el1 = el2) l1 l2
 let _converted_state_2_string id loip =
@@ -9,6 +10,12 @@ let _converted_state_2_string id loip =
   "{"^id_str^","^loip_str^"}"
 let _hashtbl_2_string ht = 
   Hashtbl.fold (fun k loip res -> _converted_state_2_string k loip ::res ) ht [] |> String.concat "|"
+let _trans_fun_data_2_string tfd = 
+  let trans_fun_data_str = List.map (fun (aid,tshift) -> "("^(string_of_int aid)^","^(string_of_int tshift)^")" ) tfd |> String.concat ";" in
+  "["^trans_fun_data_str^"]"
+let _trans_fun_2_string tf = 
+  let tfd_str = _trans_fun_data_2_string tf.Trans_fun.permutation_with_time_shift in
+  "{data="^tfd_str^";rl="^tf.react_label^"}"
 let test_transition_function_data_1 _ =
   let permutation = [1;2;3;4]
   and participants = OIntSet.empty |> OIntSet.add 2 |> OIntSet.add 4 in
@@ -44,14 +51,62 @@ let test_convert_states_1 _ =
   let imported_states = [{Tracking_bigraph.TTS.bigraph=b1;index=1};{bigraph=b2;index=2}] in
   let result_mapping = Trans_fun.convert_states imported_states agent_ctrls
   and _ = Hashtbl.add expected_mapping 1 [(4,1)];Hashtbl.add expected_mapping 2 [(1,1);(3,2)] in
-  assert_equal ~printer:_hashtbl_2_string expected_mapping result_mapping
-
+  assert_equal ~msg:"Converted states are not equal to expected" ~printer:_hashtbl_2_string expected_mapping result_mapping
+let test_convert_single_trans_1 _ =
+  let mapped_states = Hashtbl.create 2
+  and react_times = Hashtbl.create 2
+  and trans_to_convert = 
+    {
+      Tracking_bigraph.TTS.in_state_idx = 777;
+      out_state_idx = 21;
+      react_label = "my_super_label";
+      participants = (Iso.empty |> Iso.add 0 4 |> Iso.add 1 1 );
+      residue = (Fun.empty |> Fun.add 0 4 |> Fun.add 1 3 |> Fun.add 2 1 |> Fun.add 1 2 );
+      actual_out_state = Big.zero
+    }
+  in
+  let _ = Hashtbl.add mapped_states 777 [(3,1);(4,2)] ; Hashtbl.add mapped_states 21 [(0,1);(1,2)]
+  and _ = Hashtbl.add react_times "yolo_react" 3 ; Hashtbl.add react_times "my_super_label" 7 in
+  let expected_trans_fun = {Trans_fun.permutation_with_time_shift=[(2,7);(1,0)];react_label="my_super_label"}
+  and result_trans_fun = Trans_fun.convert_trans_2_trans_fun trans_to_convert mapped_states react_times in
+  assert_equal 
+    ~msg:"Converted transition function is not equal to expected" 
+    ~cmp: (fun tf1 tf2 -> (_compare_trans_fun_data tf1.Trans_fun.permutation_with_time_shift tf2.permutation_with_time_shift) && tf1.react_label = tf2.react_label)
+    ~printer: _trans_fun_2_string
+    expected_trans_fun 
+    result_trans_fun
+let test_convert_single_trans_2 _ =
+  let mapped_states = Hashtbl.create 2
+  and react_times = Hashtbl.create 2
+  and trans_to_convert = 
+    {
+      Tracking_bigraph.TTS.in_state_idx = 777;
+      out_state_idx = 21;
+      react_label = "my_super_label";
+      participants = (Iso.empty |> Iso.add 0 4 |> Iso.add 1 1 |> Iso.add 2 3);
+      residue = (Fun.empty |> Fun.add 0 4 |> Fun.add 1 3 |> Fun.add 2 1 |> Fun.add 1 2 );
+      actual_out_state = Big.zero
+    }
+  in
+  let _ = Hashtbl.add mapped_states 777 [(3,1);(4,2)] ; Hashtbl.add mapped_states 21 [(0,1);(1,2)]
+  and _ = Hashtbl.add react_times "yolo_react" 3 ; Hashtbl.add react_times "my_super_label" 7 in
+  let expected_trans_fun = {Trans_fun.permutation_with_time_shift=[(2,7);(1,7)];react_label="my_super_label"}
+  and result_trans_fun = Trans_fun.convert_trans_2_trans_fun trans_to_convert mapped_states react_times in
+  assert_equal 
+    ~msg:"Converted transition function is not equal to expected" 
+    ~cmp: (fun tf1 tf2 -> (_compare_trans_fun_data tf1.Trans_fun.permutation_with_time_shift tf2.permutation_with_time_shift) && tf1.react_label = tf2.react_label)
+    ~printer: _trans_fun_2_string
+    expected_trans_fun 
+    result_trans_fun
+    
 let suite =
   "Transition function generation" >::: [
-    "Transition function generation test 1">:: test_transition_function_data_1;
-    "Transition function generation test 2">:: test_transition_function_data_2;
+    "Transition function data generation test 1">:: test_transition_function_data_1;
+    "Transition function data generation test 2">:: test_transition_function_data_2;
     "Transition function generation test 3">:: test_transition_function_data_3;
-    "States conversion 1">:: test_convert_states_1
+    "States conversion 1">:: test_convert_states_1;
+    "Transition conversion test 1 " >:: test_convert_single_trans_1;
+    "Transition conversion test 2 " >:: test_convert_single_trans_2
 ]
 
 let () =
