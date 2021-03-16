@@ -106,3 +106,11 @@ let convert_transitions imported_states imported_trans time_shifts agent_ctrls =
       imported_trans 
   in
   converted_trans
+let parconvert_transitions imported_states imported_trans time_shifts agent_ctrls =
+  let mapped_states = convert_states imported_states agent_ctrls in
+  let converted_trans = 
+    Parmap.parmapi 
+      (fun i t -> convert_trans_2_trans_fun t mapped_states time_shifts,i )
+      (Parmap.L imported_trans)
+  in
+  converted_trans
