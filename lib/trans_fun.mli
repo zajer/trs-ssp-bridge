@@ -10,3 +10,4 @@ val convert_states : TTS.state list -> Bigraph.Ctrl.t list -> mapped_states
 val convert_transitions : TTS.state list -> TTS.trans_exported list -> react_times -> Bigraph.Ctrl.t list -> paired_trans_fun list
 val parconvert_transitions : TTS.state list -> TTS.trans_exported list -> react_times -> Bigraph.Ctrl.t list -> paired_trans_fun list
 val export_trans_funs : paired_trans_fun list -> string -> unit
+val import_trans_funs : string -> paired_trans_fun list
