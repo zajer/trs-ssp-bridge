@@ -114,3 +114,12 @@ let parconvert_transitions imported_states imported_trans time_shifts agent_ctrl
       (Parmap.L imported_trans)
   in
   converted_trans
+let _TRANS_FUN_DATA_HEADER = "permutation with time shift"
+let _TRANS_FUN_REACT_HEADER = "react"
+let _TRANS_FUN_CORRESPONDING_TRANSITION = "corresponds to transition"
+let _trans_fun_data_2_string tfd =
+  List.map (fun (aid,ts) -> "("^(string_of_int aid)^","^(string_of_int ts)^")") tfd |> String.concat ";"
+let export_trans_funs paired_tfs filename =
+  let tfs_csv = List.map (fun (tf,tid) -> [(_trans_fun_data_2_string tf.permutation_with_time_shift);(tf.react_label);(string_of_int tid)]) paired_tfs
+  and header = [_TRANS_FUN_DATA_HEADER;_TRANS_FUN_REACT_HEADER;_TRANS_FUN_CORRESPONDING_TRANSITION] in
+  Csv.save filename (header::tfs_csv)
