@@ -161,4 +161,4 @@ let import_trans_funs filename =
           and correspondence_numb = int_of_string correspondence_numb_str in
           {permutation_with_time_shift=tf_data;react_label},correspondence_numb
     )
-    imported_trans_funs_sll
+    imported_trans_funs_sll |> List.tl
