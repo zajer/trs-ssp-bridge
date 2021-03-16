@@ -126,28 +126,32 @@ let export_trans_funs paired_tfs filename =
 let _extract_next_number pair_of_numbers_str start_position =
   let number_regex = Str.regexp "[0-9]+" in
   let _ = Str.search_forward number_regex pair_of_numbers_str start_position 
-  and number = Str.matched_string pair_of_numbers_str |> int_of_string
+  and number =  Str.matched_string pair_of_numbers_str |> int_of_string
   and new_start_pos = Str.match_end () in
   number,new_start_pos
 let _extract_next_pair_of_numbers tfd_str start_position =
   let pair_of_numbers_regex = Str.regexp "[0-9]+,[0-9]+" in
-  let pair_start_position = Str.search_forward pair_of_numbers_regex tfd_str start_position in
-  let number1,new_start_pos = _extract_next_number (Str.matched_string tfd_str) pair_start_position in
-  let number2,result_new_start_pos = _extract_next_number (Str.matched_string tfd_str) new_start_pos  in
+  let _ = Str.search_forward pair_of_numbers_regex tfd_str start_position in
+  let matched = Str.matched_string tfd_str 
+  and result_new_start_pos = Str.match_end () in
+  let number1,new_start_pos = _extract_next_number matched 0 in
+  let number2,_ = _extract_next_number matched new_start_pos  in
   number1,number2,result_new_start_pos
 let _parse_trans_fun_data tfd_str =
   let result = ref [] 
-  and parse_pointer = ref 0 in
-  try
-    while true do
-      (
+  and parse_pointer = ref 0 
+  and end_flag = ref false
+  in
+    while not !end_flag do
+    (
+      try 
         let num1,num2,pointer_tmp = _extract_next_pair_of_numbers tfd_str !parse_pointer in
         parse_pointer := pointer_tmp;
-        result := (num1,num2)::!result
-      )
+        result := (num1,num2)::!result;   
+      with Not_found -> end_flag := true
+    )
     done;
     !result
-  with Not_found -> !result
 let _string_list_2_3tuple sl = 
   assert (List.length sl = 3);
   List.nth sl 0,List.nth sl 1,List.nth sl 2
@@ -157,8 +161,8 @@ let import_trans_funs filename =
     (
       fun sl ->
         let tf_data_str,react_label,correspondence_numb_str = _string_list_2_3tuple sl in
-          let tf_data = _parse_trans_fun_data tf_data_str 
+          let tf_data = _parse_trans_fun_data tf_data_str |> List.rev
           and correspondence_numb = int_of_string correspondence_numb_str in
           {permutation_with_time_shift=tf_data;react_label},correspondence_numb
     )
-    imported_trans_funs_sll |> List.tl
+    imported_trans_funs_sll

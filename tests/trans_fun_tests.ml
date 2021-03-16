@@ -3,7 +3,10 @@ module OIntSet = Set.Make(Int)
 open Trs_bridge
 open Bigraph
 let _compare_trans_fun_data l1 l2 = 
-  List.for_all2 (fun el1 el2 -> el1 = el2) l1 l2
+  if List.length l1 = List.length l2 then
+    List.for_all2 (fun el1 el2 -> el1 = el2) l1 l2
+  else
+    false
 let _converted_state_2_string id loip =
   let id_str = (string_of_int id)
   and loip_str = List.map (fun (nid,aid) -> "("^(string_of_int nid)^","^(string_of_int aid)^")" ) loip |> String.concat ";" in
@@ -98,7 +101,45 @@ let test_convert_single_trans_2 _ =
     ~printer: _trans_fun_2_string
     expected_trans_fun 
     result_trans_fun
-    
+let test_import_trans_funs_1 _ = 
+  let expected_paired_trans_fun_1 = {Trans_fun.permutation_with_time_shift=[(1,3);(2,0);(5,3);(4,0);(3,0)];react_label="yolo"},2
+  and expected_paired_trans_fun_2 = {Trans_fun.permutation_with_time_shift=[(4,1);(1,0);(3,1);(2,1);(5,0)];react_label="swag"},1 in
+  let expected_results = [expected_paired_trans_fun_1;expected_paired_trans_fun_2]
+  and imported_results = Trans_fun.import_trans_funs "trans_funs_1.csv" in
+  assert_equal
+    ~msg:"Imported transition functions are not equal to expected"
+    ~cmp:
+      (fun tf_l1 tf_l2 ->
+        if (List.length tf_l1) = (List.length tf_l2) then 
+          List.for_all2
+          (
+            fun (tf1,pn1) (tf2,pn2) -> 
+              _compare_trans_fun_data tf1.Trans_fun.permutation_with_time_shift tf2.Trans_fun.permutation_with_time_shift
+              &&
+              tf1.react_label = tf2.react_label
+              &&
+              pn1 = pn2
+          )
+          tf_l1
+          tf_l2
+        else
+          false
+      )
+      ~printer:
+          (
+            fun tf_l ->
+              List.map 
+                (
+                  fun (tf,cn) ->
+                    let tf_data_str = "Data:"^(_trans_fun_data_2_string tf.Trans_fun.permutation_with_time_shift ) in
+                    "{"^tf_data_str^" react:"^tf.react_label^"},"^(string_of_int cn)
+                )
+                tf_l
+                |> String.concat "\n"
+          )
+      expected_results
+      imported_results
+
 let suite =
   "Transition function generation" >::: [
     "Transition function data generation test 1">:: test_transition_function_data_1;
@@ -106,7 +147,8 @@ let suite =
     "Transition function generation test 3">:: test_transition_function_data_3;
     "States conversion 1">:: test_convert_states_1;
     "Transition conversion test 1 " >:: test_convert_single_trans_1;
-    "Transition conversion test 2 " >:: test_convert_single_trans_2
+    "Transition conversion test 2 " >:: test_convert_single_trans_2;
+    "Transition functions import test 1 " >:: test_import_trans_funs_1
 ]
 
 let () =
