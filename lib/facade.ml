@@ -1,5 +1,6 @@
 open Printf
 module StringMap = Map.Make(String)
+open Tracking_bigraph
 let parse_trans2timeshift_map sll =
   let raw_data =List.map 
     (
@@ -34,3 +35,25 @@ let extract_destination_states ~states_file ~patterns_file ~output_file =
   let res_as_loi = Patterns.find_final_states_csv ~states_file ~patterns_file in
   let res_as_lolos = List.map (fun i -> [string_of_int i] ) res_as_loi in
     Csv.save (output_file^".csv") res_as_lolos
+let normalize_tts ~states_file ~trans_file ~norm_trans_file =
+  let states = Tracking_bigraph.TTS.import_states states_file
+  and transitions = Tracking_bigraph.TTS.import_transitions trans_file in
+  let normalized_transitions = Norm.normalize_exported_tts states transitions in
+  let normalized_transitions_csv = 
+    List.map 
+      (
+        fun t -> [string_of_int t.TTS.in_state_idx;string_of_int t.out_state_idx;t.react_label;t.participants |> Bigraph.Iso.to_string;t.residue |> Bigraph.Fun.to_string; t.actual_out_state |> Bigraph.Big.to_string]
+      )
+      normalized_transitions
+  in
+  Csv.save norm_trans_file normalized_transitions_csv
+let transform_tts ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~ss_file =
+  let states = Tracking_bigraph.TTS.import_states states_file
+  and transitions = Tracking_bigraph.TTS.import_transitions norm_trans_file
+  and react_times = Parsing.parse_react_times react_times_file
+  and ctrls = Parsing.parse_ctrls ctrls_file 
+  in 
+    let transformed_transitions = Trans_fun.convert_transitions states transitions react_times ctrls in
+    Trans_fun.export_trans_funs transformed_transitions ss_file
+
+

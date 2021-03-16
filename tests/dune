@@ -5,6 +5,7 @@
         norm_tests
         patterns_tests
         trans_fun_tests
+        parsing_tests
     ) 
     (libraries ounit2 bigraph trs_bridge )
 )
