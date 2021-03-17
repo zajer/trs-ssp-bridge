@@ -35,6 +35,7 @@ let find_dest_states states patterns =
       {state_idx=s.index;patts_found=patterns_detected}
   )
   (Parmap.L states)
+  |> List.filter (fun ds -> match ds.patts_found with | [] -> false | _::_ -> true)
 let _string_list_2_string sl = 
   "["^(String.concat ";" sl)^"]"
 let export_dest_state dest_states file_name =
