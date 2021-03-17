@@ -32,9 +32,10 @@ let full_transformation_saving_norm ~states_file:sfn ~trans_file:tfn ~trans2time
     write_file output_filename main_file_content;
     if separate_functions then write_file ((Common.filename_without_extension "ml" output_filename)^"_functions.ml") additional_file_content else () ;;
 let extract_destination_states ~states_file ~patterns_file ~output_file =
-  let res_as_loi = Patterns.find_final_states_csv ~states_file ~patterns_file in
-  let res_as_lolos = List.map (fun i -> [string_of_int i] ) res_as_loi in
-    Csv.save (output_file^".csv") res_as_lolos
+  let states = Tracking_bigraph.TTS.import_states states_file
+  and patterns = Parsing.parse_destingation_patterns patterns_file in
+  let dest_states = Patterns.find_dest_states states patterns in
+  Patterns.export_dest_state dest_states output_file
 let normalize_tts ~states_file ~trans_file ~norm_trans_file =
   let states = Tracking_bigraph.TTS.import_states states_file
   and transitions = Tracking_bigraph.TTS.import_transitions trans_file in

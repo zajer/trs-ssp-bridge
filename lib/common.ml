@@ -61,3 +61,6 @@ let filename_without_extension extension fn =
       Str.string_before fn idx_of_extension
   with
   | Not_found -> fn
+let string_list_2_2tuple sl = 
+  assert (List.length sl = 2);
+  List.nth sl 0,List.nth sl 1
