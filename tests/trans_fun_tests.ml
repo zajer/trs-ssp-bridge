@@ -70,7 +70,7 @@ let test_convert_single_trans_1 _ =
   in
   let _ = Hashtbl.add mapped_states 777 [(3,1);(4,2)] ; Hashtbl.add mapped_states 21 [(0,1);(1,2)]
   and _ = Hashtbl.add react_times "yolo_react" 3 ; Hashtbl.add react_times "my_super_label" 7 in
-  let expected_trans_fun = {Trans_fun.permutation_with_time_shift=[(2,7);(1,0)];react_label="my_super_label"}
+  let expected_trans_fun = {Trans_fun.permutation_with_time_shift=[(2,7);(1,0)];react_label="my_super_label";from_idx=777;to_idx=21}
   and result_trans_fun = Trans_fun.convert_trans_2_trans_fun trans_to_convert mapped_states react_times in
   assert_equal 
     ~msg:"Converted transition function is not equal to expected" 
@@ -93,7 +93,7 @@ let test_convert_single_trans_2 _ =
   in
   let _ = Hashtbl.add mapped_states 777 [(3,1);(4,2)] ; Hashtbl.add mapped_states 21 [(0,1);(1,2)]
   and _ = Hashtbl.add react_times "yolo_react" 3 ; Hashtbl.add react_times "my_super_label" 7 in
-  let expected_trans_fun = {Trans_fun.permutation_with_time_shift=[(2,7);(1,7)];react_label="my_super_label"}
+  let expected_trans_fun = {Trans_fun.permutation_with_time_shift=[(2,7);(1,7)];react_label="my_super_label";from_idx=777;to_idx=21}
   and result_trans_fun = Trans_fun.convert_trans_2_trans_fun trans_to_convert mapped_states react_times in
   assert_equal 
     ~msg:"Converted transition function is not equal to expected" 
@@ -102,8 +102,8 @@ let test_convert_single_trans_2 _ =
     expected_trans_fun 
     result_trans_fun
 let test_import_trans_funs_1 _ = 
-  let expected_paired_trans_fun_1 = {Trans_fun.permutation_with_time_shift=[(1,3);(2,0);(5,3);(4,0);(3,0)];react_label="yolo"},2
-  and expected_paired_trans_fun_2 = {Trans_fun.permutation_with_time_shift=[(4,1);(1,0);(3,1);(2,1);(5,0)];react_label="swag"},1 in
+  let expected_paired_trans_fun_1 = {Trans_fun.permutation_with_time_shift=[(1,3);(2,0);(5,3);(4,0);(3,0)];react_label="yolo";from_idx=1;to_idx=2},2
+  and expected_paired_trans_fun_2 = {Trans_fun.permutation_with_time_shift=[(4,1);(1,0);(3,1);(2,1);(5,0)];react_label="swag";from_idx=7;to_idx=21},1 in
   let expected_results = [expected_paired_trans_fun_1;expected_paired_trans_fun_2]
   and imported_results = Trans_fun.import_trans_funs "trans_funs_1.csv" in
   assert_equal

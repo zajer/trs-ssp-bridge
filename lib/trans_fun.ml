@@ -4,7 +4,7 @@ module OIntSet = Set.Make(Int);;
 (* Each state id is mapped to the list of ints (representing ids of nodes) that correspond to relative agents order in that state *)
 type state_id_2_agent_node_ids_with_fix_map = (int, (int*int) list) Hashtbl.t
 type mapped_states = state_id_2_agent_node_ids_with_fix_map
-type t = {permutation_with_time_shift:(int*int) list; react_label:string}
+type t = {permutation_with_time_shift:(int*int) list; react_label:string; from_idx:int; to_idx:int}
 type paired_trans_fun = t*int
 type react_times = (string,int) Hashtbl.t
 (*#################NOWE###################################*)
@@ -81,7 +81,7 @@ let convert_trans_2_trans_fun trans mapped_states time_shift_map =
   let permutation = permutation_of_relative_agents_ids_after_trans residue_with_fixed_dom_as_list
   and participants = extract_ids_of_agents_participating_in_trans trans.participants (Hashtbl.find mapped_states trans.in_state_idx) in
   let trans_fun_data = transition_function_data permutation participants (Hashtbl.find time_shift_map trans.react_label) in
-  {permutation_with_time_shift=trans_fun_data;react_label=trans.react_label}
+  {permutation_with_time_shift=trans_fun_data;react_label=trans.react_label;from_idx=trans.in_state_idx;to_idx=trans.out_state_idx}
 let convert_states states_list agent_ctrls_list = 
   let result = Hashtbl.create (List.length states_list)
   and transformed_states = 
@@ -116,12 +116,19 @@ let parconvert_transitions imported_states imported_trans time_shifts agent_ctrl
   converted_trans
 let _TRANS_FUN_DATA_HEADER = "permutation with time shift"
 let _TRANS_FUN_REACT_HEADER = "react"
+let _TRANS_FROM_STATE_HEADER = "from"
+let _TRANS_TO_STATE_HEADER = "to"
 let _TRANS_FUN_CORRESPONDING_TRANSITION = "corresponds to transition"
 let _trans_fun_data_2_string tfd =
   List.map (fun (aid,ts) -> "("^(string_of_int aid)^","^(string_of_int ts)^")") tfd |> String.concat ";"
 let export_trans_funs paired_tfs filename =
-  let tfs_csv = List.map (fun (tf,tid) -> [(_trans_fun_data_2_string tf.permutation_with_time_shift);(tf.react_label);(string_of_int tid)]) paired_tfs
-  and header = [_TRANS_FUN_DATA_HEADER;_TRANS_FUN_REACT_HEADER;_TRANS_FUN_CORRESPONDING_TRANSITION] in
+  let tfs_csv = List.map 
+    (
+      fun (tf,tid) -> 
+        [(_trans_fun_data_2_string tf.permutation_with_time_shift);(tf.react_label);(string_of_int tf.from_idx); (string_of_int tf.to_idx);(string_of_int tid)]
+    ) 
+    paired_tfs
+  and header = [_TRANS_FUN_DATA_HEADER;_TRANS_FUN_REACT_HEADER; _TRANS_FROM_STATE_HEADER;_TRANS_TO_STATE_HEADER; _TRANS_FUN_CORRESPONDING_TRANSITION] in
   Csv.save filename (header::tfs_csv)
 let _extract_next_number pair_of_numbers_str start_position =
   let number_regex = Str.regexp "[0-9]+" in
@@ -152,17 +159,17 @@ let _parse_trans_fun_data tfd_str =
     )
     done;
     !result
-let _string_list_2_3tuple sl = 
-  assert (List.length sl = 3);
-  List.nth sl 0,List.nth sl 1,List.nth sl 2
+let _string_list_2_5tuple sl = 
+  assert (List.length sl = 5);
+  List.nth sl 0,List.nth sl 1,List.nth sl 2,List.nth sl 3,List.nth sl 4
 let import_trans_funs filename = 
   let imported_trans_funs_sll = Csv.load filename |> List.tl in
   List.map 
     (
       fun sl ->
-        let tf_data_str,react_label,correspondence_numb_str = _string_list_2_3tuple sl in
+        let tf_data_str,react_label,from_idx_str,to_idx_str,correspondence_numb_str = _string_list_2_5tuple sl in
           let tf_data = _parse_trans_fun_data tf_data_str |> List.rev
           and correspondence_numb = int_of_string correspondence_numb_str in
-          {permutation_with_time_shift=tf_data;react_label},correspondence_numb
+          {permutation_with_time_shift=tf_data;react_label;from_idx=int_of_string from_idx_str;to_idx=int_of_string to_idx_str},correspondence_numb
     )
     imported_trans_funs_sll

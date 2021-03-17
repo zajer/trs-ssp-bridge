@@ -1,6 +1,6 @@
 open Tracking_bigraph
 type mapped_states = (int, (int*int) list) Hashtbl.t
-type t = {permutation_with_time_shift:(int*int) list; react_label:string}
+type t = {permutation_with_time_shift:(int*int) list; react_label:string; from_idx:int; to_idx:int}
 type paired_trans_fun = t*int
 type react_times = (string,int) Hashtbl.t
 
