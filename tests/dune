@@ -6,6 +6,9 @@
         patterns_tests
         trans_fun_tests
         parsing_tests
+        mod_gen_tests
     ) 
     (libraries ounit2 bigraph trs_bridge )
 )
+(   rule (copy ssp_template.txt template.txt)   )
+(   rule (copy ssp_expected_result.txt template_modified.txt)   )
