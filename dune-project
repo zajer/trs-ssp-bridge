@@ -21,6 +21,7 @@
     bigraph
     tracking_bigraph
     csv
+    ssp
     (ounit2 :with-test)
   )
 )
