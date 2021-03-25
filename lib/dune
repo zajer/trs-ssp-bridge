@@ -1,6 +1,6 @@
 
 (library
   (name trs_bridge)
-  ( libraries bigraph tracking_bigraph csv )
+  ( libraries bigraph tracking_bigraph csv ssp )
 )
 

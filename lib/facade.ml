@@ -55,6 +55,6 @@ let transform_tts ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~s
   and ctrls = Parsing.parse_ctrls ctrls_file 
   in 
     let transformed_transitions = Trans_fun.convert_transitions states transitions react_times ctrls in
-    Trans_fun.export_trans_funs transformed_transitions ss_file
+    Ssp.Frontend.export_trans_funs transformed_transitions ss_file
 
 

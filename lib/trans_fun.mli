@@ -1,13 +1,10 @@
 open Tracking_bigraph
 type mapped_states = (int, (int*int) list) Hashtbl.t
-type t = {permutation_with_time_shift:(int*int) list; react_label:string; from_idx:int; to_idx:int}
-type paired_trans_fun = t*int
+type t = Ssp.State.trans_fun_raw
 type react_times = (string,int) Hashtbl.t
 
 val transition_function_data : int list ->  Set.Make(Int).t -> int -> (int*int) list
-val convert_trans_2_trans_fun : TTS.trans_exported -> mapped_states -> react_times -> t
+val convert_trans_2_trans_fun : TTS.trans_exported -> int -> mapped_states -> react_times -> t
 val convert_states : TTS.state list -> Bigraph.Ctrl.t list -> mapped_states
-val convert_transitions : TTS.state list -> TTS.trans_exported list -> react_times -> Bigraph.Ctrl.t list -> paired_trans_fun list
-val parconvert_transitions : TTS.state list -> TTS.trans_exported list -> react_times -> Bigraph.Ctrl.t list -> paired_trans_fun list
-val export_trans_funs : paired_trans_fun list -> string -> unit
-val import_trans_funs : string -> paired_trans_fun list
+val convert_transitions : TTS.state list -> TTS.trans_exported list -> react_times -> Bigraph.Ctrl.t list -> t list
+val parconvert_transitions : TTS.state list -> TTS.trans_exported list -> react_times -> Bigraph.Ctrl.t list -> t list
