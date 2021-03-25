@@ -1,6 +1,6 @@
 
 (executables
-  (names normalize_tts transform_multi_files transform_single_file find_dest_states ) 
+  (names normalize_tts transform_normed_tts transform_multi_files transform_single_file find_dest_states ) 
   (libraries trs_bridge )
   (modes native )
 ) 
