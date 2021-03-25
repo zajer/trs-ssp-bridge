@@ -69,14 +69,3 @@ let _parse_list_of_string str =
   | Some last_elt -> last_elt::inner_elts
   | None -> inner_elts*)
   inner_elts
-let import_dest_states file_name =
-  let dest_states_csv = Csv.load file_name in
-  let dest_states =
-    List.map 
-      (
-        fun sl -> let idx_str,string_list_str = Common.string_list_2_2tuple sl in
-        {Ssp.State.state_idx=(int_of_string idx_str); patts_found= _parse_list_of_string string_list_str}
-      )
-      dest_states_csv
-  in
-    dest_states

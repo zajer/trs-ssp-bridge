@@ -25,31 +25,6 @@ let _are_dest_states_equal ds1 ds2 =
   let res = ds1.Ssp.State.state_idx = ds2.Ssp.State.state_idx &&
   List.for_all (fun ds1e -> List.exists (fun ds2e -> ds1e = ds2e) ds2.patts_found) ds1.patts_found in
   res
-let test_import_dest_states_1 _ =
-  let expected_dest_state_1 = { Ssp.State.state_idx=7;patts_found=["yolo";"swag"] }
-  and expected_dest_state_2 = { Ssp.State.state_idx=21;patts_found=["bilbo";"baggins"] }
-  and source_file = "dest_states.csv"
-  in
-  let imported_dest_states = Patterns.import_dest_states source_file in
-  assert_equal 
-    ~msg:"There should be exactly two imported destination states"
-    2
-    (List.length imported_dest_states);
-  assert_equal
-    ~msg:"Imported destinations states do not match with the expected"
-    ~cmp:
-      (
-        fun dsl1 dsl2 -> 
-          List.for_all (fun dsl1e -> List.exists (fun dsl2e -> _are_dest_states_equal dsl1e dsl2e) dsl2) dsl1
-      )
-    ~printer:
-      (
-        fun dsl ->
-          let dsl_sl = List.map (fun ds -> _destination_state_2_string ds) dsl in
-          String.concat ";" dsl_sl
-      )
-      [expected_dest_state_1;expected_dest_state_2]
-      imported_dest_states
 let test_pattern_detection_1 _ = 
   let b0 = "{(0, A:0),(1, B:0),(2, C:0),(3, D:0)}\n0 4 0\n0110\n0001\n0000\n0000"
   and b1 = "{(0, A:0),(1, B:0),(2, C:0),(3, D:0)}\n0 4 0\n0110\n0000\n0001\n0000"
@@ -83,7 +58,6 @@ let test_pattern_detection_1 _ =
 let suite =
   "Patterns" >::: [
     "Destination states export test 1">::test_export_dest_states_1;
-    "Destination states import test 1">::test_import_dest_states_1;
     "Pattern detection test 1">::test_pattern_detection_1
 ]
 
