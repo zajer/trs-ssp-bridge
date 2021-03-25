@@ -6,7 +6,7 @@ type states = (int, Big.t) Hashtbl.t
 
 let map_states sl =
   let result = Hashtbl.create ~random:false (List.length sl) in
-  List.iteri (fun i s -> Hashtbl.add result i s.TTS.bigraph) sl; result
+  List.iter (fun s -> Hashtbl.add result s.TTS.index s.TTS.bigraph) sl; result
 
 (* Operations needed for normalizing a csv produced by the TRS library. *)
 let normalize_transition mapped_states (init_state_idx,res_state_idx,react_label,iso_init2lhs,iso_res2init,res_state)  =
