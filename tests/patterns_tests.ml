@@ -3,8 +3,8 @@ module IntMap = Map.Make(Int)
 open Trs_bridge
 let test_export_dest_states_1 _ =
   let tmp_file = "tmp_export_dest_states_1.csv" in
-  let exported_dest_state_1 = { Patterns.state_idx=7;patts_found=["yolo";"swag"] }
-  and exported_dest_state_2 = { Patterns.state_idx=21;patts_found=["bilbo";"baggins"] } in
+  let exported_dest_state_1 = { Ssp.State.state_idx=7;patts_found=["yolo";"swag"] }
+  and exported_dest_state_2 = { Ssp.State.state_idx=21;patts_found=["bilbo";"baggins"] } in
   Patterns.export_dest_state [exported_dest_state_1;exported_dest_state_2] tmp_file;
   let exported_dst_states = Csv.load tmp_file in
   assert_bool "There should be two rows in exported file" (List.length exported_dst_states = 2);
@@ -17,17 +17,17 @@ let test_export_dest_states_1 _ =
     ~printer:(fun sl -> assert (List.length sl = 2) ; "idx:"^(List.nth sl 0)^" patterns:"^(List.nth sl 1)  ) 
     ["21";"[bilbo;baggins]"] (List.nth exported_dst_states 1) 
 let _destination_state_2_string ds =
-  let state_idx = string_of_int ds.Patterns.state_idx
+  let state_idx = string_of_int ds.Ssp.State.state_idx
           and descriptions = "["^(String.concat ";" ds.patts_found)^"]"
           in
           "{"^state_idx^" ;"^descriptions^"}"
 let _are_dest_states_equal ds1 ds2 =
-  let res = ds1.Patterns.state_idx = ds2.Patterns.state_idx &&
+  let res = ds1.Ssp.State.state_idx = ds2.Ssp.State.state_idx &&
   List.for_all (fun ds1e -> List.exists (fun ds2e -> ds1e = ds2e) ds2.patts_found) ds1.patts_found in
   res
 let test_import_dest_states_1 _ =
-  let expected_dest_state_1 = { Patterns.state_idx=7;patts_found=["yolo";"swag"] }
-  and expected_dest_state_2 = { Patterns.state_idx=21;patts_found=["bilbo";"baggins"] }
+  let expected_dest_state_1 = { Ssp.State.state_idx=7;patts_found=["yolo";"swag"] }
+  and expected_dest_state_2 = { Ssp.State.state_idx=21;patts_found=["bilbo";"baggins"] }
   and source_file = "dest_states.csv"
   in
   let imported_dest_states = Patterns.import_dest_states source_file in
@@ -66,8 +66,8 @@ let test_pattern_detection_1 _ =
   let found_ds = Patterns.find_dest_states states_parsed lop 
   and expected_ds = 
     [
-      {Patterns.state_idx=1;patts_found=["my pattern"]};
-      {Patterns.state_idx=2;patts_found=["my pattern"]}
+      {Ssp.State.state_idx=1;patts_found=["my pattern"]};
+      {Ssp.State.state_idx=2;patts_found=["my pattern"]}
     ]
   in
   assert_equal 

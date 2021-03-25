@@ -1,5 +1,5 @@
 type pattern = {bigraph:Bigraph.Big.t;description:string}
-type dest_state = {state_idx:int;patts_found:string list}
+type dest_state = Ssp.State.dest_state
 let find_destination_states parsed_states patterns = 
   let pattern_detection_fun = fun ptrns target -> List.exists (fun p -> Bigraph.Big.occurs ~target ~pattern:p ) ptrns in
   List.map 
@@ -32,16 +32,16 @@ let find_dest_states states patterns =
   (
     fun s -> 
       let patterns_detected = pattern_detection_fun s.Tracking_bigraph.TTS.bigraph patterns in
-      {state_idx=s.index;patts_found=patterns_detected}
+      {Ssp.State.state_idx=s.index;patts_found=patterns_detected}
   )
   (Parmap.L states)
-  |> List.filter (fun ds -> match ds.patts_found with | [] -> false | _::_ -> true)
+  |> List.filter (fun ds -> match ds.Ssp.State.patts_found with | [] -> false | _::_ -> true)
 let _string_list_2_string sl = 
   "["^(String.concat ";" sl)^"]"
 let export_dest_state dest_states file_name =
   let dest_states_csv = List.map 
     (
-      fun ds -> [string_of_int ds.state_idx;_string_list_2_string ds.patts_found]
+      fun ds -> [string_of_int ds.Ssp.State.state_idx;_string_list_2_string ds.patts_found]
     )
     dest_states
   in
@@ -75,7 +75,7 @@ let import_dest_states file_name =
     List.map 
       (
         fun sl -> let idx_str,string_list_str = Common.string_list_2_2tuple sl in
-        {state_idx=(int_of_string idx_str); patts_found= _parse_list_of_string string_list_str}
+        {Ssp.State.state_idx=(int_of_string idx_str); patts_found= _parse_list_of_string string_list_str}
       )
       dest_states_csv
   in
