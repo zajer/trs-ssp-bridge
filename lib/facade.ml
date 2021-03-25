@@ -16,6 +16,16 @@ let write_file filename content =
   let oc = open_out filename in
   fprintf oc "%s\n" content;
   close_out oc;;
+let _read_file filename = 
+  let lines = ref [] in
+  let chan = open_in filename in
+  try
+    while true; do
+      lines := input_line chan :: !lines
+    done; !lines
+  with End_of_file ->
+    close_in chan ;
+    List.rev !lines ;;
 let full_transformation_saving_norm ~states_file:sfn ~trans_file:tfn ~trans2time_shift_file:t2tsfn ~ctrls_file:cfn ~module_name ~output_filename ?(separate_functions = false) number_of_agents =
   let s = Csv.load sfn 
   and t = Csv.load tfn in
@@ -56,5 +66,9 @@ let transform_tts ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~s
   in 
     let transformed_transitions = Trans_fun.convert_transitions states transitions react_times ctrls in
     Ssp.Frontend.export_trans_funs transformed_transitions ss_file
-
+let gen_ssp_source ~states_file ~template_file ~source_file number_of_agents = 
+    let states = Tracking_bigraph.TTS.import_states states_file
+    and template = _read_file template_file |> String.concat "\n" in
+    let source = Mod_gen.construct_module_content_based_on_template template ~number_of_agents ~number_of_states:(List.length states) in
+    write_file source_file source
 
