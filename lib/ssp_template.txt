@@ -1,10 +1,12 @@
 (*
     A template from which a program for generating behavior policy will be generated.
     
-    There are 2 stubs that need to be replaced with a proper ocaml code:
-    ###NUM_OF_AGS### - a number agents that system expects to contain
-    ###INIT_STATE### - an array of 2-tuples of integers 
-    
+    There are 3 stubs that need to be replaced with a proper ocaml code:
+    NUM_OF_AGS - a number agents that system expects to contain
+    INIT_STATE - an array of 2-tuples of integers 
+    NUM_OF_STS - a number of states of the system
+    Each stub is surrounded with ### that needs to be removed/replaced as well
+
     The program generated from this template requires 4 arguments:
     [1] - the name of a file that contains definitions of transition functions
     [2] - the name of a file that contains list of destination states
@@ -50,7 +52,7 @@ module StateDef = struct
         let config = _make_config trans_raw in
         {func=_trans_fun_template config;transition_idx=trans_raw.transition_idx}
     let num_of_states () =
-        6
+        ###NUM_OF_STS###
     let is_negligible s =
         Array.for_all ( fun (_,t) -> t = -1 ) s
     
