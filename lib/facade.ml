@@ -57,30 +57,4 @@ let transform_tts ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~s
     let transformed_transitions = Trans_fun.convert_transitions states transitions react_times ctrls in
     Ssp.Frontend.export_trans_funs transformed_transitions ss_file
 
-let _read_file filename = 
-  let lines = ref [] in
-  let chan = open_in filename in
-  try
-    while true; do
-      lines := input_line chan :: !lines
-    done; !lines
-  with End_of_file ->
-    close_in chan;
-    List.rev !lines ;;
-let _replace_num_of_agents_in_template num_of_ags template = 
-  let regex = Str.regexp "###NUM_OF_AGS###" in
-  Str.replace_first regex (string_of_int num_of_ags) template
-let _replace_init_state_in_template init_state_str template = 
-  let regex = Str.regexp "###INIT_STATE###" in
-  Str.replace_first regex init_state_str template
-let _generate_init_state_str num_of_ags = 
-  let part_result = List.init num_of_ags (fun i -> "("^(string_of_int i)^",0)") |> String.concat ";" in
-  "[|"^part_result^"|]"
-let construct_module_based_on_template template_filename number_of_agents =
-  let template = _read_file template_filename |> String.concat "\n"
-  and init_state_str = _generate_init_state_str number_of_agents in
-  _replace_init_state_in_template init_state_str template
-  |>
-  _replace_num_of_agents_in_template number_of_agents 
-
 
