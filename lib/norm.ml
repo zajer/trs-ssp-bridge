@@ -7,7 +7,7 @@ let map_states sl =
   List.iter (fun s -> Hashtbl.add result s.TTS.index s.TTS.bigraph) sl; result
 let normalize_single_transition mapped_states trans = 
   let new_out_state = Hashtbl.find mapped_states trans.TTS.out_state_idx in
-  let iso_to_be_applied_on_actual_out_state = TBig.translate_equal ~from_b:new_out_state ~to_b:trans.actual_out_state  in
+  let iso_to_be_applied_on_actual_out_state = TBig.translate_equal ~to_b:new_out_state ~from_b:trans.actual_out_state  in
     let new_iso_res2init = Fun.transform 
       ~iso_dom:iso_to_be_applied_on_actual_out_state 
       ~iso_codom:(Fun.to_list trans.residue |> List.map (fun (_,i2) -> i2 ) |> make_id_iso) 
