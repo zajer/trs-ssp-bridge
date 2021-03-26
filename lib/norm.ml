@@ -1,9 +1,8 @@
-open Common
 open Bigraph
 open Tracking_bigraph
 module IntMap = Map.Make(Int);;
 type states = (int, Big.t) Hashtbl.t
-
+let make_id_iso set = List.map (fun x -> x,x ) set |> Bigraph.Iso.of_list
 let map_states sl =
   let result = Hashtbl.create ~random:false (List.length sl) in
   List.iter (fun s -> Hashtbl.add result s.TTS.index s.TTS.bigraph) sl; result
