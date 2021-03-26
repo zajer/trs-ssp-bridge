@@ -1,21 +1,31 @@
 open OUnit2
 module IntMap = Map.Make(Int)
 open Trs_bridge
+let _compare_lists_of_patterns lop1 lop2 = 
+  List.compare_lengths lop1 lop2 = 0 &&
+  List.for_all (fun pd1 -> List.exists (fun pd2 -> pd1 = pd2 ) lop2 ) lop1 &&
+  List.for_all (fun pd2 -> List.exists (fun pd1 -> pd1 = pd2 ) lop1 ) lop2
+let _compare_patterns p1 p2 = 
+  p1.Ssp.State.state_idx =p2.Ssp.State.state_idx &&
+  _compare_lists_of_patterns p1.patts_found p2.patts_found
+let _pattern_2_string = (fun p ->  "idx:"^( p.Ssp.State.state_idx |> string_of_int )^" patterns:"^(String.concat ";" p.patts_found)  ) 
 let test_export_dest_states_1 _ =
   let tmp_file = "tmp_export_dest_states_1.csv" in
   let exported_dest_state_1 = { Ssp.State.state_idx=7;patts_found=["yolo";"swag"] }
   and exported_dest_state_2 = { Ssp.State.state_idx=21;patts_found=["bilbo";"baggins"] } in
   Patterns.export_dest_state [exported_dest_state_1;exported_dest_state_2] tmp_file;
-  let exported_dst_states = Csv.load tmp_file in
-  assert_bool "There should be two rows in exported file" (List.length exported_dst_states = 2);
+  let result_of_export = Ssp.Frontend.import_dest_states tmp_file in
+  assert_bool "There should be two rows in exported file" (List.length result_of_export = 2);
   assert_equal 
     ~msg:"First row of exported dst states is not equal to expected"
-    ~printer:(fun sl -> assert (List.length sl = 2) ; "idx:"^(List.nth sl 0)^" patterns:"^(List.nth sl 1)  ) 
-    ["7";"[yolo;swag]"] (List.nth exported_dst_states 0);
+    ~printer:_pattern_2_string
+    ~cmp:_compare_patterns
+    exported_dest_state_1 (List.nth result_of_export 0);
     assert_equal 
     ~msg:"The second row of exported dst states is not equal to expected"
-    ~printer:(fun sl -> assert (List.length sl = 2) ; "idx:"^(List.nth sl 0)^" patterns:"^(List.nth sl 1)  ) 
-    ["21";"[bilbo;baggins]"] (List.nth exported_dst_states 1) 
+    ~printer:_pattern_2_string
+    ~cmp:_compare_patterns
+    exported_dest_state_2 (List.nth result_of_export 1) 
 let _destination_state_2_string ds =
   let state_idx = string_of_int ds.Ssp.State.state_idx
           and descriptions = "["^(String.concat ";" ds.patts_found)^"]"
