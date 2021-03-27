@@ -1,27 +1,67 @@
 open OUnit2
-module IntMap = Map.Make(Int)
-open Trs_bridge
-let norm_transition_1 _ = 
-  let b0_template = "{(0, AT1:3),(1, A:0),(2, B:0),(3, AT1:3),(4, AT1:3),(5, AT2:1)}\n1 6 0\n100111\n011000\n000000\n000000\n000000\n000000\n000000\n({}, {ca1a2}, {(0, 1), (3, 1)})\n({}, {ca2a3}, {(3, 1), (4, 1)})\n({}, {ca2a4}, {(3, 1), (5, 1)})\n({}, {lc1a1}, {(0, 1)})\n({}, {lc1a3}, {(4, 1)})\n({}, {lc2a1}, {(0, 1)})\n({}, {lc2a3}, {(4, 1)})"
-  and b1_template = "{(0, AT1:3),(1, AT1:3),(2, A:0),(3, B:0),(4, AT1:3),(5, AT2:1)}\n1 6 0\n110011\n000100\n001000\n000000\n000000\n000000\n000000\n({}, {ca1a2}, {(0, 1), (1, 1)})\n({}, {ca2a3}, {(1, 1), (4, 1)})\n({}, {ca2a4}, {(1, 1), (5, 1)})\n({}, {lc1a1}, {(0, 1)})\n({}, {lc1a3}, {(4, 1)})\n({}, {lc2a1}, {(0, 1)})\n({}, {lc2a3}, {(4, 1)})"
-  and b1_iso = "{(0, AT1:3),(1, AT1:3),(2, A:0),(3, B:0),(4, AT1:3),(5, AT2:1)}\n1 6 0\n110011\n000000\n001100\n000000\n000000\n000000\n000000\n({}, {}, {(0, 1), (1, 1)})\n({}, {}, {(0, 1), (4, 1)})\n({}, {}, {(0, 1), (5, 1)})\n({}, {}, {(1, 1)})\n({}, {}, {(1, 1)})\n({}, {}, {(4, 1)})\n({}, {}, {(4, 1)})"
+open Ssp_bridge
+let test_norm_single_transition_1 _ = 
+  let b0_template = Norm_tests_data.test_norm_single_transition_1_b0_str
+  and b1_template = Norm_tests_data.test_norm_single_transition_1_b1_str
+  and b0_iso = Norm_tests_data.test_norm_single_transition_1_b0_iso_str
+  and reference_in_state_idx = 1
+  and reference_out_state_idx = 0
+  and reference_react_label = "r1"
   in
-  let lhs2init = Bigraph.Iso.of_list [(0, 1); (1, 2); (2, 0)]
-  and res2init = Bigraph.Iso.of_list [(0, 1); (1, 0); (2, 2); (3, 3); (4, 4); (5, 5)] in
-  let map_of_states = IntMap.singleton 0 (Bigraph.Big.of_string b0_template) |> IntMap.add 1 (Bigraph.Big.of_string b1_template) 
-  and transition_to_norm = (1,0,"r1",lhs2init,res2init,Bigraph.Big.of_string b1_iso) in
-  let (nt_from,nt_to,nt_label,nt_lhs2init,nt_residue2init,_) = Norm.normalize_transition map_of_states transition_to_norm in
-  assert_equal nt_from 1 ;
-  assert_equal nt_to 0;
-  assert_equal nt_label "r1";
-  assert_equal nt_lhs2init lhs2init;
-  assert_equal (Bigraph.Iso.apply nt_residue2init 2) (Some 3);
-  assert_equal (Bigraph.Iso.apply nt_residue2init 1) (Some 2)
+  let lhs2in_map = Bigraph.Iso.of_list [(0, 1); (1, 2); (2, 0)]
+  and out2in_map = Bigraph.Fun.of_list [(0, 1); (1, 0); (2, 2); (3, 3); (4, 4); (5, 5)] 
+  and expected_out2in_map = [(0,0);(1,2);(2,3);(3,1);(4,4);(5,5)] |> Bigraph.Fun.of_list
+  in
+  let map_of_states = Hashtbl.create 10 
+  and transition_to_norm = 
+    { 
+      Tracking_bigraph.TTS.in_state_idx=reference_in_state_idx;
+      out_state_idx=reference_out_state_idx;
+      react_label=reference_react_label;
+      participants=lhs2in_map;
+      residue=out2in_map;
+      actual_out_state=(Bigraph.Big.of_string b0_iso)
+    }
+  in
+  let _ = Hashtbl.add map_of_states 0 (Bigraph.Big.of_string b0_template) ; Hashtbl.add map_of_states 1 (Bigraph.Big.of_string b1_template) in
+  let normalized_transition = Norm.normalize_single_transition map_of_states transition_to_norm in
+  assert_equal
+    ~msg:"Input state idx in normalized transition is not equal to expected"
+    reference_in_state_idx
+    normalized_transition.in_state_idx ;
+  assert_equal 
+    ~msg:"Output state idx in normalized transition is not equal to expected"
+    reference_out_state_idx
+    normalized_transition.out_state_idx;
+  assert_equal 
+    ~msg:"Reaction label in normalized transition is not equal to expected"
+    reference_react_label
+    normalized_transition.react_label;
+  assert_equal 
+    ~msg:"Participants in normalized transition is not equal to expected"
+    ~cmp:Bigraph.Iso.equal
+    ~printer:Bigraph.Iso.to_string
+    lhs2in_map
+    normalized_transition.participants;
+  assert_equal
+    ~msg:"Residue of normalized transition is not equal to expected"
+    ~printer:Bigraph.Fun.to_string
+    expected_out2in_map
+    normalized_transition.residue;
+  assert_equal
+    ~msg:"Residue test 1 for normalized transition returned value other than expected"
+    ~printer:(fun r -> match r with | None -> "None" | Some r' -> string_of_int r')
+    (Some 3) 
+    (Bigraph.Fun.apply normalized_transition.residue 2);
+  assert_equal 
+    ~msg:"Residue test 2 for normalized transition returned value other than expected"
+    ~printer:(fun r -> match r with | None -> "None" | Some r' -> string_of_int r')
+    (Some 2)
+    (Bigraph.Fun.apply normalized_transition.residue 1)
 let suite =
   "Normalization" >::: [
-    "Transition normalization test 1">:: norm_transition_1;
-    
-]
+    "Single transition normalization test 1">:: test_norm_single_transition_1
+  ]
 
 let () =
   run_test_tt_main suite
