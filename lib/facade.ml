@@ -1,6 +1,6 @@
 open Printf
 open Tracking_bigraph
-let write_file filename content = 
+let _write_file filename content = 
   let oc = open_out filename in
   fprintf oc "%s\n" content;
   close_out oc;;
@@ -43,7 +43,7 @@ let gen_ssp_source ~states_file ~template_file ~source_file number_of_agents =
     let states = Tracking_bigraph.TTS.import_states states_file
     and template = _read_file template_file |> String.concat "\n" in
     let source = Mod_gen.construct_module_content_based_on_template template ~number_of_agents ~number_of_states:(List.length states) in
-    write_file source_file source
+    _write_file source_file source
 let all_in_one 
   ~in_states_file 
   ~in_patterns_file 
@@ -67,6 +67,6 @@ let all_in_one
   let transformed_transitions = Trans_fun.convert_transitions states normalized_transitions react_times ctrls in
   Ssp.Frontend.export_trans_funs transformed_transitions out_ssp_input_file ;
   Patterns.export_dest_state dest_states out_dest_states_file ;
-  write_file out_ssp_source_code_file source
+  _write_file out_ssp_source_code_file source
     
 

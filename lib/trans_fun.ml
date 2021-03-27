@@ -1,12 +1,9 @@
-module IntMap = Map.Make(Int);;
-module StringMap = Map.Make(String);;
 module OIntSet = Set.Make(Int);;
 (* Each state id is mapped to the list of ints (representing ids of nodes) that correspond to relative agents order in that state *)
 type state_id_2_agent_node_ids_with_fix_map = (int, (int*int) list) Hashtbl.t
 type mapped_states = state_id_2_agent_node_ids_with_fix_map
 type t = Ssp.State.trans_fun_raw
 type react_times = (string,int) Hashtbl.t
-(*#################NOWE###################################*)
 let _bintset_2_int_list bis =
   Bigraph.IntSet.fold (fun i res -> i::res) bis []
 (* Bigraph.Nodes.find_all considers only the control type. It ommits arity of a control!*)
