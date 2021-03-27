@@ -1,5 +1,5 @@
 open OUnit2
-open Trs_bridge
+open Ssp_bridge
 let test_parse_ctrls_1 _ =
   let expected_ctrl_1 = "A:0" |> Bigraph.Ctrl.of_string
   and expected_ctrl_2 = "B:0" |> Bigraph.Ctrl.of_string

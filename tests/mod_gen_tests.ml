@@ -1,5 +1,5 @@
 open OUnit2 
-open Trs_bridge
+open Ssp_bridge
 let test_construct_program_source_1 _ = 
   let template = "###NUM_OF_AGS###\n###INIT_STATE###\n###NUM_OF_STS###"
   and number_of_agents = 3

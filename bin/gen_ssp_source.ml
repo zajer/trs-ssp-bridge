@@ -16,6 +16,6 @@ let help () =
     and noa = Sys.argv.(2) |> int_of_string
     and output_file = Sys.argv.(3) 
     and template_file = if Array.length Sys.argv = 5 then Sys.argv.(4) else "ssp_template.txt" in
-        Trs_bridge.Facade.gen_ssp_source ~states_file ~template_file ~source_file:output_file noa
+        Ssp_bridge.Facade.gen_ssp_source ~states_file ~template_file ~source_file:output_file noa
     else
         help ()

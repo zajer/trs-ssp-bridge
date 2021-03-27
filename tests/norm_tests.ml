@@ -1,5 +1,5 @@
 open OUnit2
-open Trs_bridge
+open Ssp_bridge
 let test_norm_single_transition_1 _ = 
   let b0_template = Norm_tests_data.test_norm_single_transition_1_b0_str
   and b1_template = Norm_tests_data.test_norm_single_transition_1_b1_str

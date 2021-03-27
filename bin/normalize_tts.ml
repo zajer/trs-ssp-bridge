@@ -16,6 +16,6 @@ let help () =
     let states_file = Sys.argv.(1)
     and trans_file = Sys.argv.(2)
     and output_file = Sys.argv.(3) in
-        Trs_bridge.Facade.normalize_tts ~states_file ~trans_file ~norm_trans_file:output_file
+        Ssp_bridge.Facade.normalize_tts ~states_file ~trans_file ~norm_trans_file:output_file
     else
         help ()

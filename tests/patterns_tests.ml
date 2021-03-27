@@ -1,6 +1,6 @@
 open OUnit2
 module IntMap = Map.Make(Int)
-open Trs_bridge
+open Ssp_bridge
 let _compare_lists_of_patterns lop1 lop2 = 
   List.compare_lengths lop1 lop2 = 0 &&
   List.for_all (fun pd1 -> List.exists (fun pd2 -> pd1 = pd2 ) lop2 ) lop1 &&

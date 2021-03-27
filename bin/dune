@@ -1,6 +1,6 @@
 
 (executables
   (names normalize_tts transform_normed_tts gen_ssp_source find_dest_states all_in_one) 
-  (libraries trs_bridge )
+  (libraries ssp_bridge )
   (modes native )
 ) 

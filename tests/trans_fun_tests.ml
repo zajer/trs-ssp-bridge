@@ -1,6 +1,6 @@
 open OUnit2
 module OIntSet = Set.Make(Int)
-open Trs_bridge
+open Ssp_bridge
 open Bigraph
 let _compare_trans_fun_data l1 l2 = 
   if List.length l1 = List.length l2 then
