@@ -1,5 +1,4 @@
 open Printf
-module StringMap = Map.Make(String)
 open Tracking_bigraph
 let write_file filename content = 
   let oc = open_out filename in
@@ -45,4 +44,29 @@ let gen_ssp_source ~states_file ~template_file ~source_file number_of_agents =
     and template = _read_file template_file |> String.concat "\n" in
     let source = Mod_gen.construct_module_content_based_on_template template ~number_of_agents ~number_of_states:(List.length states) in
     write_file source_file source
+let all_in_one 
+  ~in_states_file 
+  ~in_patterns_file 
+  ~in_trans_file 
+  ~in_react_times_file 
+  ~in_ctrls_file 
+  ~number_of_agents
+  ~in_template_file 
+  ~out_dest_states_file
+  ~out_ssp_input_file 
+  ~out_ssp_source_code_file = 
+  let states = Tracking_bigraph.TTS.import_states in_states_file
+  and patterns = Parsing.parse_destingation_patterns in_patterns_file
+  and transitions = Tracking_bigraph.TTS.import_transitions in_trans_file 
+  and react_times = Parsing.parse_react_times in_react_times_file
+  and ctrls = Parsing.parse_ctrls in_ctrls_file 
+  and template = _read_file in_template_file |> String.concat "\n" in
+  let dest_states = Patterns.find_dest_states states patterns 
+  and normalized_transitions = Norm.normalize_exported_tts states transitions 
+  and source = Mod_gen.construct_module_content_based_on_template template ~number_of_agents ~number_of_states:(List.length states) in
+  let transformed_transitions = Trans_fun.convert_transitions states normalized_transitions react_times ctrls in
+  Ssp.Frontend.export_trans_funs transformed_transitions out_ssp_input_file ;
+  Patterns.export_dest_state dest_states out_dest_states_file ;
+  write_file out_ssp_source_code_file source
+    
 
