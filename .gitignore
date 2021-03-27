@@ -9,6 +9,9 @@
 *.cmxa
 *.opam
 
+# Ignoring the results produced by scripts in the example directory
+exmp_*
+
 # ocamlbuild working directory
 _build/
 

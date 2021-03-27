@@ -1,5 +1,0 @@
-(copy_files (files %{project_root}/examples/find_dest_states.exe))
-(copy_files (files %{project_root}/examples/normalize_tts.exe))
-(copy_files (files %{project_root}/examples/transform_normed_tts.exe))
-(copy_files (files %{project_root}/examples/gen_ssp_source.exe))
-(copy_files (files %{project_root}/lib/ssp_template.txt))
