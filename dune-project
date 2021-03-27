@@ -1,4 +1,4 @@
-(lang dune 2.0)
+(lang dune 2.7)
 (name TRS_bridge)
 (version 0.8.0)
 (generate_opam_files true)

@@ -69,7 +69,7 @@ let imported_trans_funs = Frontend.import_trans_funs transitions_file
 let dest_states = Frontend.import_dest_states destination_states_file
 let dest_state_idx = Frontend.destination_state_idx Frontend.FirstFound dest_states
 let init_situation = ###INIT_STATE### |> Tools.SS.init_situation 
-let max_num_of_steps = Sys.arv.(3)
+let max_num_of_steps = Sys.argv.(3) |> int_of_string
 let init_sm,tm = Tools.make_ssp_system imported_trans_funs init_situation ~state_idx:0 ~num_of_states:(StateDef.num_of_states ())
 let situations_mx,num_of_steps,is_found = Tools.search_for_situation_in_state init_sm tm ~state_idx:dest_state_idx ~max_num_of_steps;;
 (*Array.iteri
