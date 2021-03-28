@@ -7,8 +7,8 @@
 (license MIT)
 (authors "Piotr Cybulski")
 (maintainers "pikus3@list.pl")
-(homepage "https://github.com/zajer/trs-ssb-bridge")
-(bug_reports "https://github.com/zajer/trs-ssb-bridge")
+(homepage "https://github.com/zajer/trs-ssp-bridge")
+(bug_reports "https://github.com/zajer/trs-ssp-bridge")
 
 (package
   (name SSP_bridge)
