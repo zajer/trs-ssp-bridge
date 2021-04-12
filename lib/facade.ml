@@ -31,9 +31,9 @@ let normalize_tts ~states_file ~trans_file ~norm_trans_file =
       normalized_transitions
   in
   Csv.save norm_trans_file normalized_transitions_csv
-let transform_tts ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~ss_file =
+let transform_tts ~is_trans_file_headerless ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~ss_file =
   let states = Tracking_bigraph.TTS.import_states states_file
-  and transitions = Tracking_bigraph.TTS.import_transitions norm_trans_file
+  and transitions = Tracking_bigraph.TTS.import_transitions ~headers_in_first_row:(not is_trans_file_headerless) norm_trans_file
   and react_times = Parsing.parse_react_times react_times_file
   and ctrls = Parsing.parse_ctrls ctrls_file 
   in 

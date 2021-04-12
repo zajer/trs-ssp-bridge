@@ -1,6 +1,6 @@
 (lang dune 2.7)
 (name SSP_bridge)
-(version 1.0.0)
+(version 1.0.1)
 (generate_opam_files true)
 
 (source (github zajer/trs-ssp-bridge))

@@ -20,6 +20,6 @@ let () =
   and trans2timeshift_file = Sys.argv.(3)
   and ctrls_file = Sys.argv.(4)
   and output = Sys.argv.(5) in
-        Facade.transform_tts ~states_file ~norm_trans_file ~react_times_file:trans2timeshift_file ~ctrls_file ~ss_file:output
+        Facade.transform_tts ~is_trans_file_headerless:true ~states_file ~norm_trans_file ~react_times_file:trans2timeshift_file ~ctrls_file ~ss_file:output
   else
     help ()
