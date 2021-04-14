@@ -1,5 +1,5 @@
 (lang dune 2.7)
-(name SSP_bridge)
+(name ssp_bridge)
 (version 1.0.1)
 (generate_opam_files true)
 
@@ -11,7 +11,7 @@
 (bug_reports "https://github.com/zajer/trs-ssp-bridge")
 
 (package
-  (name SSP_bridge)
+  (name ssp_bridge)
   (synopsis "Tools for converting outputs of Tracking_bigraph library into programs using SSP library.")
   (description 
     "A library with facade executables to convert an output from Tracking_bigraph. 
