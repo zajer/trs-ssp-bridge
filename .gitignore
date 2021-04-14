@@ -7,7 +7,6 @@
 *.cmx
 *.cmxs
 *.cmxa
-*.opam
 
 # Ignoring the results produced by scripts in the example directory
 exmp_*
