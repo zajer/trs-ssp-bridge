@@ -102,6 +102,29 @@ let test_convert_single_trans_2 _ =
     ~printer: _trans_fun_2_string
     expected_trans_fun 
     result_trans_fun
+let test_convert_single_trans_3 _ =
+  let mapped_states = Hashtbl.create 2
+  and react_times = Hashtbl.create 1
+  and trans_to_convert,trans_to_convert_id = 
+    {
+      Tracking_bigraph.TTS.in_state_idx = 0;
+      out_state_idx = 1;
+      react_label = "mov";
+      participants = (Iso.empty |> Iso.add 0 10 |> Iso.add 1 4 |> Iso.add 2 3);
+      residue = (Fun.empty |> Fun.add 0 0 |> Fun.add 1 1 |> Fun.add 2 2 |> Fun.add 3 5 |> Fun.add 4 6 |> Fun.add 5 7 |> Fun.add 6 12 |> Fun.add 7 11 |> Fun.add 8 15 |> Fun.add 9 14 |> Fun.add 10 13 |> Fun.add 11 10 |> Fun.add 12 4 |> Fun.add 13 3 |> Fun.add 14 8 |> Fun.add 15 9 |> Fun.add 16 16 );
+      actual_out_state = Big.zero
+    }, 2
+  in
+  let _ = Hashtbl.add mapped_states 0 [(8,1);(9,2);(10,3)] ; Hashtbl.add mapped_states 1 [(11,1);(14,2);(15,3)]
+  and _ = Hashtbl.add react_times "mov" 1 in
+  let expected_trans_fun = {Ssp.State.permutation_with_time_shift=[(3,1);(1,0);(2,0)];react_label="mov";from_idx=0;to_idx=1;transition_idx=trans_to_convert_id}
+  and result_trans_fun = Trans_fun.convert_trans_2_trans_fun trans_to_convert trans_to_convert_id mapped_states react_times in
+  assert_equal 
+    ~msg:"Converted transition function is not equal to expected" 
+    ~cmp: _compare_trans_funs
+    ~printer: _trans_fun_2_string
+    expected_trans_fun 
+    result_trans_fun
 let suite =
   "Transition function generation" >::: [
     "Transition function data generation test 1">:: test_transition_function_data_1;
@@ -109,7 +132,8 @@ let suite =
     "Transition function generation test 3">:: test_transition_function_data_3;
     "States conversion 1">:: test_convert_states_1;
     "Transition conversion test 1 " >:: test_convert_single_trans_1;
-    "Transition conversion test 2 " >:: test_convert_single_trans_2
+    "Transition conversion test 2 " >:: test_convert_single_trans_2;
+    "Transition conversion test 3 " >:: test_convert_single_trans_3;
 ]
 
 let () =
