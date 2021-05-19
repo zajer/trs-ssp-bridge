@@ -12,8 +12,8 @@ let test_norm_single_transition_1 _ =
   and out2in_map = Bigraph.Fun.of_list [(0, 1); (1, 0); (2, 2); (3, 3); (4, 4); (5, 5)] 
   and expected_out2in_map = [(0,0);(1,2);(2,3);(3,1);(4,4);(5,5)] |> Bigraph.Fun.of_list
   in
-  let map_of_states = Hashtbl.create 10 
-  and transition_to_norm = 
+  (*let map_of_states = Hashtbl.create 10 *)
+  let transition_to_norm = 
     { 
       Tracking_bigraph.TTS.in_state_idx=reference_in_state_idx;
       out_state_idx=reference_out_state_idx;
@@ -23,7 +23,8 @@ let test_norm_single_transition_1 _ =
       actual_out_state=(Bigraph.Big.of_string b0_iso)
     }
   in
-  let _ = Hashtbl.add map_of_states 0 (Bigraph.Big.of_string b0_template) ; Hashtbl.add map_of_states 1 (Bigraph.Big.of_string b1_template) in
+  let map_of_states = [|Some (Bigraph.Big.of_string b0_template); Some (Bigraph.Big.of_string b1_template)|] in
+  (*let _ = Hashtbl.add map_of_states 0 (Bigraph.Big.of_string b0_template) ; Hashtbl.add map_of_states 1 (Bigraph.Big.of_string b1_template) in*)
   let normalized_transition = Norm.normalize_single_transition map_of_states transition_to_norm in
   assert_equal
     ~msg:"Input state idx in normalized transition is not equal to expected"
