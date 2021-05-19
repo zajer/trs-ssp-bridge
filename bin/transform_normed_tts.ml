@@ -14,12 +14,13 @@ let help () =
   Arg5 - the name of the file with transition functions (output of this program).
   "
 let () = 
-  if Array.length Sys.argv = 6 then
+  if Array.length Sys.argv >= 6 then
   let states_file = Sys.argv.(1)
   and norm_trans_file = Sys.argv.(2)
   and trans2timeshift_file = Sys.argv.(3)
   and ctrls_file = Sys.argv.(4)
-  and output = Sys.argv.(5) in
-        Facade.transform_tts ~is_trans_file_headerless:true ~states_file ~norm_trans_file ~react_times_file:trans2timeshift_file ~ctrls_file ~ss_file:output
+  and output = Sys.argv.(5)
+  and parallel = if Array.length Sys.argv = 7 then bool_of_string Sys.argv.(6) else false in
+        Facade.transform_tts ~parallel ~is_trans_file_headerless:true ~states_file ~norm_trans_file ~react_times_file:trans2timeshift_file ~ctrls_file ~ss_file:output
   else
     help ()
