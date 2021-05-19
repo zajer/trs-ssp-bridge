@@ -42,11 +42,11 @@ let _relative_agents_2_node_ids_after_trans residue_with_fixed_dom_as_list =
       (fun i (agent_node_in_out_state,_) -> i+1,agent_node_in_out_state )
       residue_sorted_by_codom in
   permutation
-let permutation_of_relative_agents_ids_after_trans residue_with_fixed_dom_as_list =
-  let rel_agents_2_node_ids = _relative_agents_2_node_ids_after_trans residue_with_fixed_dom_as_list in
-  let permutation_of_rel_agents = _fix_numbering_of_dom rel_agents_2_node_ids in
-  let _, result = List.split permutation_of_rel_agents in
-  result
+let permutation_of_relative_agents_ids_after_trans residue_with_fixed_dom_as_list = 
+  let result_as_array = Array.init (List.length residue_with_fixed_dom_as_list) (fun _ -> -1)
+  and residue_sorted_by_codom = List.sort (fun (_,nid1) (_,nid2) -> Int.compare nid1 nid2) residue_with_fixed_dom_as_list in
+  List.iteri (fun relative_agent_id (index_in_array,_) -> Array.set result_as_array (index_in_array-1) (relative_agent_id+1) ) residue_sorted_by_codom;
+  Array.to_list result_as_array
 let extract_ids_of_agents_participating_in_trans part_fun list_of_agent_node_ids_in_input_state_with_fix =
   let codom_of_part_fun_filtered_of_nonagent_nodes_and_codom_transformed_to_relative_agent_id =
     List.filter_map
@@ -68,7 +68,8 @@ let transition_function_data permutation_of_agents_ids_after_trans ids_of_agents
       fun agent_id -> 
         if OIntSet.mem agent_id ids_of_agents_participating_in_trans then 
           (agent_id, time_shift) 
-        else (agent_id, 0)
+        else 
+          (agent_id, 0)
     )
     permutation_of_agents_ids_after_trans
 let convert_trans_2_trans_fun trans trans_id mapped_states time_shift_map = 
@@ -78,9 +79,20 @@ let convert_trans_2_trans_fun trans trans_id mapped_states time_shift_map =
   and participants = extract_ids_of_agents_participating_in_trans trans.participants (Hashtbl.find mapped_states trans.in_state_idx) in
   let trans_fun_data = transition_function_data permutation participants (Hashtbl.find time_shift_map trans.react_label) in
   {Ssp.State.permutation_with_time_shift=trans_fun_data;react_label=trans.react_label;from_idx=trans.in_state_idx;to_idx=trans.out_state_idx;transition_idx=trans_id}
-let convert_states states_list agent_ctrls_list = 
+let _transform_states agent_ctrls_list = 
+  fun state -> 
+    let state_idx = state.Tracking_bigraph.TTS.index
+    and list_of_agent_nodes = _extract_agent_node_ids state.bigraph agent_ctrls_list in
+    let list_of_agent_nodes_mapped_with_relative_agent_ids = map_agent_node_ids_2_relative_agent_ids list_of_agent_nodes in
+    state_idx,list_of_agent_nodes_mapped_with_relative_agent_ids
+let convert_states ?(parallel=true) states_list agent_ctrls_list = 
   let result = Hashtbl.create (List.length states_list)
   and transformed_states = 
+    if parallel then
+      Parmap.parmap (_transform_states agent_ctrls_list) (Parmap.L states_list)
+    else
+      List.map (_transform_states agent_ctrls_list) states_list
+    (*
     List.map 
       (
         fun state -> 
@@ -89,6 +101,7 @@ let convert_states states_list agent_ctrls_list =
           let list_of_agent_nodes_mapped_with_relative_agent_ids = map_agent_node_ids_2_relative_agent_ids list_of_agent_nodes in
           state_idx,list_of_agent_nodes_mapped_with_relative_agent_ids
       ) states_list
+    *)
   in
   List.iter 
     (fun (s_idx,list) -> Hashtbl.add result s_idx list ) 
@@ -103,7 +116,7 @@ let convert_transitions imported_states imported_trans time_shifts agent_ctrls =
   in
   converted_trans
 let parconvert_transitions imported_states imported_trans time_shifts agent_ctrls =
-  let mapped_states = convert_states imported_states agent_ctrls in
+  let mapped_states = convert_states ~parallel:true imported_states agent_ctrls in
   let converted_trans = 
     Parmap.parmapi 
       (fun i t -> convert_trans_2_trans_fun t i mapped_states time_shifts )
