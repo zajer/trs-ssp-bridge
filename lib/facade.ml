@@ -1,5 +1,6 @@
 open Printf
 open Tracking_bigraph
+let _debug = false
 let _write_file filename content = 
   let oc = open_out filename in
   fprintf oc "%s\n" content;
@@ -19,26 +20,37 @@ let extract_destination_states ~states_file ~patterns_file ~output_file =
   and patterns = Parsing.parse_destingation_patterns patterns_file in
   let dest_states = Patterns.find_dest_states states patterns in
   Patterns.export_dest_state dest_states output_file
-let normalize_tts ~states_file ~trans_file ~norm_trans_file =
+let _trans2csv = fun t -> [string_of_int t.TTS.in_state_idx;string_of_int t.out_state_idx;t.react_label;t.participants |> Bigraph.Iso.to_string;t.residue |> Bigraph.Fun.to_string; t.actual_out_state |> Bigraph.Big.to_string]
+let normalize_tts ~parallel ~states_file ~trans_file ~norm_trans_file =
   let states = Tracking_bigraph.TTS.import_states states_file
   and transitions = Tracking_bigraph.TTS.import_transitions trans_file in
-  let normalized_transitions = Norm.normalize_exported_tts states transitions in
+  let normalized_transitions = if parallel then Norm.parnormalize_exported_tts states transitions else Norm.normalize_exported_tts states transitions in
   let normalized_transitions_csv = 
-    List.map 
+    if parallel then
+      Parmap.parmap _trans2csv (Parmap.L normalized_transitions)
+    else
+      List.map _trans2csv normalized_transitions
+    (*List.map 
       (
         fun t -> [string_of_int t.TTS.in_state_idx;string_of_int t.out_state_idx;t.react_label;t.participants |> Bigraph.Iso.to_string;t.residue |> Bigraph.Fun.to_string; t.actual_out_state |> Bigraph.Big.to_string]
       )
-      normalized_transitions
+      normalized_transitions*)
   in
   Csv.save norm_trans_file normalized_transitions_csv
-let transform_tts ~is_trans_file_headerless ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~ss_file =
+let transform_tts ~parallel ~is_trans_file_headerless ~states_file ~norm_trans_file ~react_times_file ~ctrls_file ~ss_file =
   let states = Tracking_bigraph.TTS.import_states states_file
   and transitions = Tracking_bigraph.TTS.import_transitions ~headers_in_first_row:(not is_trans_file_headerless) norm_trans_file
   and react_times = Parsing.parse_react_times react_times_file
   and ctrls = Parsing.parse_ctrls ctrls_file 
   in 
-    let transformed_transitions = Trans_fun.convert_transitions states transitions react_times ctrls in
-    Ssp.Frontend.export_trans_funs transformed_transitions ss_file
+    if _debug then print_endline "TRANSFORM_TTS:Components loaded. Transforming...";
+    let transformed_transitions = 
+      if parallel then
+        Trans_fun.parconvert_transitions states transitions react_times ctrls
+      else
+        Trans_fun.convert_transitions states transitions react_times ctrls in
+    Ssp.Frontend.export_trans_funs transformed_transitions ss_file;
+    if _debug then print_endline "TRANSFORM_TTS:Finished"
 let gen_ssp_source ~states_file ~template_file ~source_file number_of_agents = 
     let states = Tracking_bigraph.TTS.import_states states_file
     and template = _read_file template_file |> String.concat "\n" in
